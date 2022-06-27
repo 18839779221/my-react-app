@@ -1,24 +1,29 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import { TopBar, topBarList } from "./topbar/TobBar";
+import { Body } from "./body/Body";
+import { Route, Routes } from "react-router-dom";
+import { FindMusic } from "./find_music/FindMusic";
 
 function App() {
   return (
+    <Routes>
+      <Route path="/" element={<AppLayout />}>
+        {topBarList.map((item, index) => (
+          <Route path={item.link} element={item.component} key={index}></Route>
+        ))}
+        <Route path="*" element={<FindMusic/>}></Route>
+      </Route>
+    </Routes>
+  );
+}
+
+function AppLayout() {
+  return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <nav>
+        <TopBar />
+      </nav>
+      <Body />
     </div>
   );
 }
