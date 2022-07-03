@@ -1,3 +1,8 @@
+export interface CommonDateListModel<T> {
+    data: T[],
+    code: number,
+}
+
 export interface BannerResModel {
     banners: BannerModel[],
     code: number
@@ -84,4 +89,41 @@ export interface AlbumModel {
     paid: boolean,
     onSale: boolean,
 }
+
+// 合并到MusicDetailModel
+// export interface MusicUrlModel {
+//     id: number,
+//     url: string,
+//     br: number,
+//     size: number,
+//     md5: string,
+//     code: number, 
+//     expi: number,
+//     type: string,
+//     level: string
+// }
+
+export interface MusicDetailResModel {
+    songs: MusicDetailModel[],
+    code: 200
+}
+
+export interface MusicDetailModel {
+    id: number,
+    name: string,
+    ar: ArtistModel[],
+    alia: string[],
+    tns: string[],
+    publishTime: number,
+    mv: number,
+    pop: number,
+    dt: number, //歌曲时长
+    al: AlbumModel,
+    url: string,
+    br: number,
+    size: number,
+    md5: string,
+}
+
+
 

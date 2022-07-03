@@ -1,13 +1,20 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, Dispatch } from "@reduxjs/toolkit";
 
-const initialState = {
-  currentIndex: 0,
-  playList: [],
+interface State {
+  currentIndex: number,
+  playList: [
+    {
+      id: number
+    }
+  ],
 };
 
 const playMusicSlice = createSlice({
   name: "playMusic",
-  initialState: initialState,
+  initialState: {
+    currentIndex: 0,
+    playList: [],
+  },
   reducers: {
     switchMusic: (state, action) => {
       state.currentIndex++;
@@ -17,6 +24,15 @@ const playMusicSlice = createSlice({
     },
   },
 });
+
+const updatePlayListByPlayListId = (playListId: number) => {
+  return (dispatch: Dispatch) => {
+
+  }
+
+}
+
+export const selectCurrentMusic = (state: State) => state.playList[state.currentIndex];
 
 export const { switchMusic, updatePlayList } = playMusicSlice.actions;
 

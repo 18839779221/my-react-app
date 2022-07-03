@@ -1,7 +1,11 @@
 import "./MusicPlayer.css";
 import "../img/iconfont.js";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { formatDurationMMSS } from "../utils/format";
+import { useSelector } from "react-redux";
+import { selectCurrentMusic } from "./playMusicSlice";
+import request from "../utils/request";
+import { CommonDateListModel, MusicDetailModel, MusicDetailResModel } from "../model/model";
 
 interface Props {
   className?: string;
@@ -10,6 +14,7 @@ interface State {
   playState: boolean;
   currentTime: number;
   duration: number;
+  music: MusicDetailModel | null;
 }
 
 export function MusicPlayer(props: Props) {
@@ -18,26 +23,64 @@ export function MusicPlayer(props: Props) {
     playState: false,
     currentTime: 0,
     duration: 0,
+    music: null,
   })
 
-  let audioPlayer: HTMLAudioElement | null = null;
+  let audioPlayer = useRef<HTMLAudioElement | null>(null);
+
+  let currentMusic = useSelector(selectCurrentMusic)
 
   useEffect(() => {
-    audioPlayer = document.querySelector("#player-music-player");
-
+    if (!audioPlayer.current) {
+      audioPlayer.current = document.querySelector("#player-music-player");
+    }
   }, [])
+
+  useEffect(() => {
+    request({
+      url: '/song/detail',
+      params: {
+        ids: currentMusic.id,
+      }
+    }).then((res: MusicDetailResModel) => {
+      if (res.songs.length == 0) return
+      setState((prevState) => ({
+        ...prevState,
+        music: {
+          ...prevState.music,
+          ...res.songs[0]
+        }
+      }))
+    })
+
+    request({
+      url: '/song/url',
+      params: {
+        id: currentMusic.id,
+      }
+    }).then((res: CommonDateListModel<MusicDetailModel>) => {
+      if (res.data.length == 0) return
+      setState((prevState) => ({
+        ...prevState,
+        music: {
+          ...prevState.music,
+          ...res.data[0]
+        }
+      }))
+    })
+  }, [currentMusic])
 
   const onDurationChanged = () => {
     setState((prevState) => ({
       ...prevState,
-      duration: audioPlayer?.duration || 0,
+      duration: audioPlayer.current?.duration || 0,
     }));
   };
 
   const onTimeUpdate = () => {
     setState((prevState) => ({
       ...prevState,
-      currentTime: audioPlayer?.currentTime || 0,
+      currentTime: audioPlayer.current?.currentTime || 0,
     }));
   };
 
@@ -47,9 +90,9 @@ export function MusicPlayer(props: Props) {
       playState: !prevState.playState,
     }));
     if (!state.playState) {
-      audioPlayer?.play();
+      audioPlayer.current?.play();
     } else {
-      audioPlayer?.pause();
+      audioPlayer.current?.pause();
     }
   }
 
@@ -68,8 +111,8 @@ export function MusicPlayer(props: Props) {
 
   // 注意React.MouseEvent和MouseEvent不一样
   const seek = (event: React.MouseEvent) => {
-    if (event.target instanceof Element && audioPlayer) {
-        audioPlayer.currentTime = (event.nativeEvent.offsetX / event.target.clientWidth) * state.duration;
+    if (event.target instanceof Element && audioPlayer.current) {
+        audioPlayer.current.currentTime = (event.nativeEvent.offsetX / event.target.clientWidth) * state.duration;
     }
   };
 
@@ -135,7 +178,7 @@ export function MusicPlayer(props: Props) {
           autoPlay
           onDurationChange={onDurationChanged}
           onTimeUpdate={onTimeUpdate}
-          src="https://music.163.com/song/media/outer/url?id=1953828422.mp3"
+          src={state.music?.url}
         >
           Your browser does not support the <code>audio</code> element.
         </audio>
