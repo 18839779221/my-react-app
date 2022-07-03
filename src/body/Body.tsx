@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import { MusicPlayer } from '../music_palyer/MusicPlayer';
+import { MusicPlayer } from '../music_player/MusicPlayer';
 import './Body.css'
 import { Copyright } from './Copyright';
 

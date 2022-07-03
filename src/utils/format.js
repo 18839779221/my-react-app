@@ -69,3 +69,15 @@ const getDigit = function (integer) {
   }
   return digit;
 };
+
+export function formatDurationMMSS(duration) {
+  let minute = parseInt(duration / 60);
+  let second = parseInt(duration % 60);
+  if (minute < 10) {
+    minute = "0"+minute;
+  }
+  if (second < 10) {
+    second = "0"+second;
+  }
+  return `${minute}:${second}`
+}
