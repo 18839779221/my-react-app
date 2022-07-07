@@ -125,5 +125,51 @@ export interface MusicDetailModel {
     md5: string,
 }
 
+export interface PlayListResModel {
+    code: number,
+    playlist: PlayListModel
+}
+
+export interface PlayListModel {
+    id: number,
+    name: string,
+    coverImgId: number,
+    coverImgUrl: string,
+    userId: number,
+    createTime: number,
+    status: number,
+    trackCount: number,
+    playCount: number,
+    subscribeCount: number,
+    subscribers: UserInfoModel[],
+    ordered: boolean,
+    description: string,
+    tags: string[],
+    creator: UserInfoModel,
+    tracks: MusicDetailModel[]
+}
+
+export interface UserInfoModel {
+    defaultAvatar: boolean,
+    province: number,
+    authStatus: number,
+    followed: boolean,
+    avatarUrl: string,
+    accountStatus: boolean,
+    gender: number,
+    city: number,
+    birthday: number,
+    userId: number,
+    userType: number,
+    nickname: string,
+    description: string,
+    detailDescription: string,
+    avatarImgId: number,
+    backgroundImgId: number,
+    backgroundUrl: string,
+}
+
+
+
 
 

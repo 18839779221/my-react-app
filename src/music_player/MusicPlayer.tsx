@@ -2,57 +2,53 @@ import "./MusicPlayer.css";
 import "../img/iconfont.js";
 import React, { useEffect, useRef, useState } from "react";
 import { formatDurationMMSS } from "../utils/format";
-import { useSelector } from "react-redux";
-import { selectCurrentMusic } from "./playMusicSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { selectCurrentMusic, selectPlayMusic, switchMusicAction, updateCurrentMusicWithUrlAction } from "./playMusicSlice";
 import request from "../utils/request";
-import { CommonDateListModel, MusicDetailModel, MusicDetailResModel } from "../model/model";
+import { CommonDateListModel, MusicDetailModel } from "../model/model";
 
 interface Props {
   className?: string;
 }
-interface State {
-  playState: boolean;
-  currentTime: number;
-  duration: number;
-  music: MusicDetailModel | null;
-}
 
 export function MusicPlayer(props: Props) {
     
-  const [state, setState] = useState<State>({
-    playState: false,
-    currentTime: 0,
-    duration: 0,
-    music: null,
-  })
+  const [playState, setPlayState] = useState<boolean>(false)
+  const [currentTime, setCurrentTime] = useState<number>(0)
+  const [duration, setDuration] = useState<number>(0)
+
+  let dispatch = useDispatch()
+
+  let playMusicInfo = useSelector(selectPlayMusic)
+  let currentMusic = useSelector(selectCurrentMusic)
 
   let audioPlayer = useRef<HTMLAudioElement | null>(null);
 
-  let currentMusic = useSelector(selectCurrentMusic)
+  // useEffect(() => {
+  //   if (!audioPlayer.current) {
+  //     audioPlayer.current = document.querySelector("#player-music-player");
+  //   }
+  // }, [])
 
   useEffect(() => {
-    if (!audioPlayer.current) {
-      audioPlayer.current = document.querySelector("#player-music-player");
-    }
-  }, [])
+    if (!currentMusic) return
+    // request({
+    //   url: '/song/detail',
+    //   params: {
+    //     ids: currentMusic.id,
+    //   }
+    // }).then((res: MusicDetailResModel) => {
+    //   if (res.songs.length == 0) return
+    //   setState((prevState) => ({
+    //     ...prevState,
+    //     music: {
+    //       ...prevmusic,
+    //       ...res.songs[0]
+    //     }
+    //   }))
+    // })
 
-  useEffect(() => {
-    request({
-      url: '/song/detail',
-      params: {
-        ids: currentMusic.id,
-      }
-    }).then((res: MusicDetailResModel) => {
-      if (res.songs.length == 0) return
-      setState((prevState) => ({
-        ...prevState,
-        music: {
-          ...prevState.music,
-          ...res.songs[0]
-        }
-      }))
-    })
-
+    if (currentMusic.url) return
     request({
       url: '/song/url',
       params: {
@@ -60,36 +56,20 @@ export function MusicPlayer(props: Props) {
       }
     }).then((res: CommonDateListModel<MusicDetailModel>) => {
       if (res.data.length == 0) return
-      setState((prevState) => ({
-        ...prevState,
-        music: {
-          ...prevState.music,
-          ...res.data[0]
-        }
-      }))
+      dispatch(updateCurrentMusicWithUrlAction(res.data[0]))
     })
   }, [currentMusic])
 
   const onDurationChanged = () => {
-    setState((prevState) => ({
-      ...prevState,
-      duration: audioPlayer.current?.duration || 0,
-    }));
+      setDuration(audioPlayer.current?.duration || 0)
   };
 
   const onTimeUpdate = () => {
-    setState((prevState) => ({
-      ...prevState,
-      currentTime: audioPlayer.current?.currentTime || 0,
-    }));
+      setCurrentTime(audioPlayer.current?.currentTime || 0)
   };
 
   function switchPlayState() {
-    setState((prevState) => ({
-      ...prevState,
-      playState: !prevState.playState,
-    }));
-    if (!state.playState) {
+    if (!playState) {
       audioPlayer.current?.play();
     } else {
       audioPlayer.current?.pause();
@@ -97,29 +77,41 @@ export function MusicPlayer(props: Props) {
   }
 
   function playIcon() {
-    if (state.playState) {
+    if (playState) {
       return "#icon-shipinbofangshizanting";
     } else {
       return "#icon-shipinbofangshibofang";
     }
   }
 
-  function getProgress() {
-    if (state.duration == 0) return "0%";
-    return `${(state.currentTime / state.duration) * 100}%`;
+  function getProgress(): string {
+    if (duration == 0) return "0%";
+    return `${(currentTime / duration) * 100}%`;
   }
 
   // 注意React.MouseEvent和MouseEvent不一样
   const seek = (event: React.MouseEvent) => {
     if (event.target instanceof Element && audioPlayer.current) {
-        audioPlayer.current.currentTime = (event.nativeEvent.offsetX / event.target.clientWidth) * state.duration;
+        audioPlayer.current.currentTime = (event.nativeEvent.offsetX / event.target.clientWidth) * duration;
     }
   };
+
+  const switchMusic = (offset: number) => {
+    dispatch(switchMusicAction(playMusicInfo.currentIndex+offset))
+  }
+
+  const getMusicImg = (): string => {
+    if (currentMusic?.al.picUrl) {
+      return `url(${currentMusic?.al.picUrl}) center center / cover no-repeat`
+    } else {
+      return "wheat"
+    }
+  }
 
     return (
       <div className={`player-main ${props.className || ""}`}>
         {/* 播放按钮 */}
-        <svg className="icon player-switch-icon" aria-hidden="true">
+        <svg className="icon player-switch-icon" aria-hidden="true" onClick={(e) => switchMusic(-1)}>
           <use xlinkHref="#icon-zuobofang"></use>
         </svg>
         <svg
@@ -129,16 +121,16 @@ export function MusicPlayer(props: Props) {
         >
           <use xlinkHref={playIcon()}></use>
         </svg>
-        <svg className="icon player-switch-icon" aria-hidden="true">
+        <svg className="icon player-switch-icon" aria-hidden="true" onClick={(e) => switchMusic(1)}>
           <use xlinkHref="#icon-youbofang"></use>
         </svg>
 
-        <a className="player-music-img" href=""></a>
+        <a className="player-music-img" href="" style={{background: getMusicImg()}}></a>
 
         <div className="player-info-and-progress">
           <div>
-            <a className="player-music-name">星光灿烂</a>
-            <a className="player-singer-name">谭咏麟</a>
+            <a className="player-music-name">{currentMusic?.name}</a>
+            <a className="player-singer-name">{currentMusic?.ar[0].name || "未知"}</a>
           </div>
 
           {/* 进度条 */}
@@ -155,10 +147,10 @@ export function MusicPlayer(props: Props) {
             </div>
             <span className="player-progress-text">
               <span style={{ color: "#a1a1a1" }}>
-                {formatDurationMMSS(state.currentTime)}&nbsp;
+                {formatDurationMMSS(currentTime)}&nbsp;
               </span>
               <span>
-                &nbsp;/&nbsp;{formatDurationMMSS(state.duration)}
+                &nbsp;/&nbsp;{formatDurationMMSS(duration)}
               </span>
             </span>
           </div>
@@ -178,7 +170,11 @@ export function MusicPlayer(props: Props) {
           autoPlay
           onDurationChange={onDurationChanged}
           onTimeUpdate={onTimeUpdate}
-          src={state.music?.url}
+          onEnded={() => switchMusic(1)}
+          onPlay={() => setPlayState(true)}
+          onPause={() => setPlayState(false)}
+          src={currentMusic?.url}
+          ref={audioPlayer}
         >
           Your browser does not support the <code>audio</code> element.
         </audio>
