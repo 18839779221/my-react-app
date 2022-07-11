@@ -22,7 +22,7 @@ export function MusicPlayer(props: Props) {
   let playMusicInfo = useSelector(selectPlayMusic)
   let currentMusic = useSelector(selectCurrentMusic)
 
-  let audioPlayer = useRef<HTMLAudioElement | null>(null);
+  let audioPlayer = useRef<HTMLAudioElement>(null)
 
   // useEffect(() => {
   //   if (!audioPlayer.current) {

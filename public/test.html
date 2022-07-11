@@ -1,35 +1,38 @@
 <html data-dpr="1" style="font-size: 40px;">
     <head>
-        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+        <style type="text/css">
+            .main {
+                width: 300px;
+                height: 300px;
+                display: flex;
+                align-items: center;
+                justify-content: space-evenly;
+                flex-wrap: wrap;
+                background-color: antiquewhite;
+                padding: 1px;
+            }
+            .child-box {
+                width: 32%;
+                height: 32%;
+                flex-shrink: 1;
+                background-color: aqua;
+            }
+        </style>
+        <script>
+            window.onload = function() {
+                let mainDiv = document.querySelector(".main")
+                let innerHTML = "" 
+                for (let i=0;i<9;i++) {
+                    innerHTML += "<div class='child-box'></div>"
+                }
+                console.log(innerHTML)
+                mainDiv.innerHTML = innerHTML
+            }
+        </script>
     </head>
     <body>
-        <div style="padding: 16px 32px 60px">
-            <div class="title" style="
-                    line-height: 72px; 
-                    font-weight: 700; 
-                    font-size: 48px; 
-                    color: rgb(35, 39, 46)">
-                pageTitle
-            </div>
-        
-            <div class="time" style="
-                    margin-top: 16px; 
-                    line-height: 44px; 
-                    font-size: 28px; 
-                    color: rgb(189, 189, 189)">
-                publishTime
-            </div>
-        
-            <div class="content" ignoreFilterXss style="margin-top: 16px;
-                    line-height: 56px;
-                    font-size: 32px;
-                    text-align: justify;
-                    word-break: break-all;
-                    color: rgb(35, 39, 46)">
-            </div>
+        <div class="main">
+            
         </div>
-        <script>
-            document.querySelector(".content").innerHTML = "<p>content</p>"
-        </script>
     </body>
 </html>
